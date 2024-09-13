@@ -4212,6 +4212,8 @@ MonoBehaviour:
   cardmekuriSE: {fileID: 8300000, guid: 4256d7415ae594e049dffd2cb0d67155, type: 3}
   cardhuffleSE: {fileID: 8300000, guid: d9800c086c460466fa41eeba48ee71aa, type: 3}
   monsterid: 0
+  setcount: 2
+  boolsetcount: 0
   numbers: 000000000000000001000000010000000200000002000000030000000300000000000000000000000100000001000000
   blinkInterval: 0.1
   blinkDuration: 0.6

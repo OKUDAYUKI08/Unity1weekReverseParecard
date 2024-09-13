@@ -29,12 +29,10 @@ public class parameter : MonoBehaviour
     [Header("プレイヤーの最大HP")]public int Player_MaxHp;
     [Header("プレイヤーの攻撃力")]public int Player_Attack;
     [Header("プレイヤーの残りガードターン数")]public int Player_GardTurn;
-
     [Header("プレイヤーの初期HP")]public int InitPlayer_Hp;
     [Header("プレイヤーの初期最大HP")]public int InitPlayer_MaxHp;
     [Header("プレイヤーの初期攻撃力")]public int InitPlayer_Attack;
     [Header("プレイヤーの初期残りガードターン数")]public int InitPlayer_GardTurn;
-
     [Header("出現したモンスターの識別ID")]public int monsterid;
     
     void Start()

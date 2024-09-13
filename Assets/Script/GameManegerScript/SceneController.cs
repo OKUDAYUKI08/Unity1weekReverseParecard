@@ -5,6 +5,7 @@ using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
 using unityroom.Api;
+using JetBrains.Annotations;
 public class SceneController : MonoBehaviour
 {
     public GameObject[] backimages;
@@ -32,6 +33,12 @@ public class SceneController : MonoBehaviour
 
     public GameObject firstclearcard; //ペア成立後1枚目にめくったカードがあったところに新しく置くカード
     public GameObject secondclearcard;//ペア成立後２枚目にめくったカードににあったところに新しく置くカード
+
+    public MonsterStatus Enemy; 
+
+    public int monsterid; //モンスターを識別するID
+    public int setcount;
+    public int boolsetcount;
 
     [Header("攻撃カードが揃った時のSE")]public AudioClip attackSE;
     [Header("敵へのダメージSE")]public AudioClip enemydamageSE;
@@ -118,7 +125,7 @@ public class SceneController : MonoBehaviour
             maxhp:1,
             attack_strong:10,
             attack_weak:10,
-            misstolerance:3,
+            misstolerance:1,
             name : "ミミック"
         ),
         new MonsterStatus(
@@ -191,9 +198,7 @@ public class SceneController : MonoBehaviour
     };
     //
     
-    public MonsterStatus Enemy; 
 
-    public int monsterid; //モンスターを識別するID
 
     private void Start()
     {
@@ -206,9 +211,11 @@ public class SceneController : MonoBehaviour
     public int[] numbers = {0, 0, 1, 1, 2, 2, 3, 3,0,0,1,1};
     private void Enit()
     {
+        int randam = 0;
         Vector3 startPos = originalCard.transform.position;
         Cards = new MemoryCard[12];
-        int randam = (int)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(MonsterType)).Length);
+
+        randam = (int)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(MonsterType)).Length);
         monsterid = randam;
         Enemy = new MonsterStatus(hp:monsters[monsterid].Hp , maxhp:monsters[monsterid].MaxHp , attack_strong:monsters[monsterid].Attack_Strong , attack_weak:monsters[monsterid].Attack_Weak , misstolerance:monsters[monsterid].Misstolerance , name:monsters[monsterid].Name);
         GameObject  enemy = Instantiate(monster_images[monsterid],monsterposition,quaternion.identity);
@@ -273,7 +280,6 @@ public class SceneController : MonoBehaviour
         {
 
             _firstRevealed = card;
-            Debug.Log(cardscript.id);
             if(cardscript.id==(int)CardType.card_attack)
             {
                 firstclearcard=Instantiate(card_images[cardscript.id],card.transform.position,Quaternion.identity);
@@ -294,7 +300,6 @@ public class SceneController : MonoBehaviour
         else
         {
             _secondRevealed = card;
-            Debug.Log(cardscript.id);
             if(cardscript.id==(int)CardType.card_attack)
             {
                 secondclearcard=Instantiate(card_images[cardscript.id],card.transform.position,Quaternion.identity);
@@ -418,13 +423,12 @@ public class SceneController : MonoBehaviour
                         // ダメージを受ける
                         if(Enemy.Misstolerance==0)
                         {
+                            // 強攻撃
                             parameter.instance.Player_Hp -= Enemy.Attack_Strong;
-                            Debug.Log("強");
                         }
                         else
                         {
                             parameter.instance.Player_Hp -= Enemy.Attack_Weak;
-                            Debug.Log("弱");
                         }
                         if(parameter.instance.Player_Hp<0)
                         {
@@ -483,18 +487,41 @@ public class SceneController : MonoBehaviour
                 EnemyGameobject[EnemyCount] = null;
                 
                 // 新しいモンスターを設定
-                monsterid = (int)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(MonsterType)).Length);
-                Enemy = new MonsterStatus(
-                    hp: monsters[monsterid].Hp,
-                    maxhp: monsters[monsterid].MaxHp,
-                    attack_strong: monsters[monsterid].Attack_Strong,
-                    attack_weak: monsters[monsterid].Attack_Weak,
-                    misstolerance: monsters[monsterid].Misstolerance,
-                    name: monsters[monsterid].Name
-                );
+                boolsetcount = parameter.instance.EnemyDefeats/setcount;
+                GameObject newEnemy;
+                if(boolsetcount==0)
+                {
+                    monsterid = (int)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(MonsterType)).Length);
+                    Enemy = new MonsterStatus(hp:monsters[monsterid].Hp , maxhp:monsters[monsterid].MaxHp , attack_strong:monsters[monsterid].Attack_Strong , attack_weak:monsters[monsterid].Attack_Weak , misstolerance:monsters[monsterid].Misstolerance , name:monsters[monsterid].Name);
+                    newEnemy = Instantiate(monster_images[monsterid], monsterposition, quaternion.identity);
+                    Debug.Log("setcount"+setcount);
+                    Debug.Log("EnemyDefeats"+parameter.instance.EnemyDefeats);
+                    Debug.Log("Boolsetcount"+boolsetcount);
+                }
+                else
+                {
+                    monsterid = (int)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(BossType)).Length);
+                    Enemy = new MonsterStatus(hp:bosses[monsterid].Hp , maxhp:bosses[monsterid].MaxHp , attack_strong:bosses[monsterid].Attack_Strong , attack_weak:bosses[monsterid].Attack_Weak , misstolerance:bosses[monsterid].Misstolerance , name:bosses[monsterid].Name);
+                    newEnemy = Instantiate(boss_images[monsterid], monsterposition, quaternion.identity);
+                    setcount++;
+                    boolsetcount=0;
+                    Debug.Log("setcount"+setcount);
+                    Debug.Log("EnemyDefeats"+parameter.instance.EnemyDefeats);
+                    Debug.Log("Boolsetcount"+boolsetcount);
+                }
+
+                // 新しいモンスターを設定
+                // monsterid = (int)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(MonsterType)).Length);
+                // Enemy = new MonsterStatus(
+                //     hp: monsters[monsterid].Hp,
+                //     maxhp: monsters[monsterid].MaxHp,
+                //     attack_strong: monsters[monsterid].Attack_Strong,
+                //     attack_weak: monsters[monsterid].Attack_Weak,
+                //     misstolerance: monsters[monsterid].Misstolerance,
+                //     name: monsters[monsterid].Name
+                // );
                 
-                // 新しいモンスターを生成し、リストに追加
-                GameObject newEnemy = Instantiate(monster_images[monsterid], monsterposition, quaternion.identity);
+
                 
                 // フェードインスクリプトを新しく生成したモンスターにアタッチ
                 newEnemy.AddComponent<Fadeinobject>();
@@ -538,15 +565,14 @@ public class SceneController : MonoBehaviour
                     textshakecontroller.TriggerShake();
                     if(_firstRevealed.GetComponent<MemoryCard>().id == (int)CardType.card_damage || _secondRevealed.GetComponent<MemoryCard>().id == (int)CardType.card_damage)
                     {
+                        // 弱攻撃
                         //　片方だけ傷カード
                         parameter.instance.Player_Hp -= Enemy.Attack_Weak;
-                        Debug.Log("弱");
-                        Debug.Log("first"+_firstRevealed.GetComponent<MemoryCard>().id);
                     }
                     else
                     {
+                        // 通常攻撃
                         parameter.instance.Player_Hp--;
-                        Debug.Log("通常");
                     }
                 }
                 // ガードターンがある時にミスした時にガードターンを減らす
@@ -577,7 +603,6 @@ public class SceneController : MonoBehaviour
         }
         if(parameter.instance.Player_Hp==0)
         {
-            Debug.Log("ゲームオーバー");
             parameter.instance.gameover = true;
             resultactivecontroller.ResultActive();
             UnityroomApiClient.Instance.SendScore(1, parameter.instance.EnemyDefeats, ScoreboardWriteMode.HighScoreDesc);
